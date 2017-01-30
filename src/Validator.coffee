@@ -1,7 +1,6 @@
 _ = require 'underscore'
 Exceptions = require 'exception'
 Rules = require 'rules'
-Navigator = require './Navigator'
 
 class Validator
 
@@ -17,7 +16,6 @@ class Validator
     constructor: (params = {}, container) ->
         # Injectable dependencies - tests only because it is lazy instantiate
         @Rules = container?.Rules or Rules
-        @Navigator =  container?.Navigator or Navigator
 
         # Defaults
         @timeout = params[Validator.PARAMS_TIMEOUT] ? Validator.DEFAULT_TIMEOUT
@@ -42,7 +40,7 @@ class Validator
     # @param {function} callback
     validate: (data, callback) ->
         validate = @validatorRules
-        fieldErrors = {}
+        fieldErrors = []
         validatedFields = {}
         expired = false
         succeeded = false
@@ -50,19 +48,19 @@ class Validator
         for expression of validate
             fieldRule = validate[expression]
 
-            value = @Navigator.get data, expression
+            value = @get data, expression
 
             if typeof fieldRule is 'function'
                 fieldRule(value, data,
                     ((expression) ->
                         return (error) ->
                             validatedFields[expression] = true
-                            fieldErrors[expression] = error if error
+                            fieldErrors.push error if error
                     )(expression)
                 )
             else
                 result = @_test value, fieldRule
-                fieldErrors[expression] = result if result
+                fieldErrors.push result if result
                 validatedFields[expression] = true
 
         # Start a timer to control validations
@@ -135,5 +133,12 @@ class Validator
     # See the tests for examples
     _test: (value, rules) ->
         @Rules.test value, rules
+
+    get: (object, expression) ->
+        parts = expression.split '.'
+        for part in parts
+            return object[part] unless object[part]?
+            object = object[part]
+        object
 
 module.exports = Validator
