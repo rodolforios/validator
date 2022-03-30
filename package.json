@@ -29,7 +29,7 @@
   "dependencies": {
     "moment": "^2.14.1",
     "underscore": "^1.8.3",
-    "exceptions": "https://github.com/s2way/Exception.git",
-    "rules": "https://github.com/s2way/Rules.git"
+    "exceptions": "https://github.com/rodolforios/Exception.git",
+    "rules": "https://github.com/rodolforios/Rules.git"
   }
 }
